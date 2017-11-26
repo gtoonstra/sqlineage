@@ -30,6 +30,7 @@ void initialize_fsm() {
     current = &root;
     root.op = NONE;
     strcpy(root.table, "ROOT");
+    strcpy(root.alias, "ROOT");
     root.parent = &root;
 }
 
@@ -194,7 +195,6 @@ void push_symbol(const char symbol) {
     if (symbol == ')') {
         current->scope_ctr--;
         if (current->scope_ctr < current->level) {
-            printf("Down a level\n");
             current = current->parent;
             current->next = NEXT_IS_ALIAS;
             while (current->sibling != NULL) {
@@ -231,7 +231,7 @@ void send_model(PyObject *callback) {
                 break;
         }
 
-        arglist = Py_BuildValue("(ssssi)", cur->parent->table, cur->table, cur->alias, operation, cur->level);
+        arglist = Py_BuildValue("(ssssi)", cur->parent->alias, cur->table, cur->alias, operation, cur->level);
         if (arglist == NULL) {
             printf("Arg list could not be built. An exception occurred\n");
             break;

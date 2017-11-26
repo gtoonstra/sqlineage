@@ -22,13 +22,13 @@ class TestCTEs(unittest.TestCase):
         self.clear_result()
         with open(filename, 'r') as infile:
             sql = infile.read()
-            sqlineage.parse(sql, self.callback)
+            sqlineage.scan(sql, self.callback)
         self.verify_result(expected)
 
     def test_simple(self):
         self.run_test('tests/resources/cte_statements/simple.sql', 
-            [('ROOT','ROOT','','NONE',0),
+            [('ROOT','ROOT','ROOT','NONE',0),
              ('ROOT','','foo','WITH',1),
-             ('','mytable','mytable','SELECT',2),
+             ('foo','mytable','mytable','SELECT',2),
              ('ROOT','other_table','other_table','INSERT',1),
              ('ROOT','foo','foo','SELECT',1)])

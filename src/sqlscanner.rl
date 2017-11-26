@@ -184,7 +184,7 @@ int scanner(const char *sql)
 
 
 static PyObject *
-sqlineage_parse(PyObject *self, PyObject *args)
+sqlineage_scan(PyObject *self, PyObject *args)
 {
     const char *sql;
     PyObject *temp;
@@ -214,7 +214,7 @@ sqlineage_parse(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef SqlineageMethods[] = {
-    {"parse",  sqlineage_parse, METH_VARARGS, "Parse an SQL file"},
+    {"scan",  sqlineage_scan, METH_VARARGS, "Scan an SQL file"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

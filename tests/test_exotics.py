@@ -15,20 +15,21 @@ class TestExotics(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
+        print(self.result)
         self.assertEqual(self.result, expected)
 
     def run_test(self, filename, expected):
         self.clear_result()
         with open(filename, 'r') as infile:
             sql = infile.read()
-            sqlineage.parse(sql, self.callback)
+            sqlineage.scan(sql, self.callback)
         self.verify_result(expected)
 
     def test_nolock_statements(self):
         self.run_test('tests/resources/exotics/nolock_statements.sql', 
-            [('ROOT','ROOT','','NONE',0),
+            [('ROOT','ROOT','ROOT','NONE',0),
              ('ROOT','subselects','subselects','INSERT',1),
              ('ROOT','','foo','SELECT',1),
-             ('','foo.bar.tablename','b','SELECT',2),
-             ('','abc.dbo.xyz','c','SELECT',2),
-             ('','abc.def.xyz','d','SELECT',2)])
+             ('foo','foo.bar.tablename','b','SELECT',2),
+             ('foo','abc.dbo.xyz','c','SELECT',2),
+             ('foo','abc.def.xyz','d','SELECT',2)])
