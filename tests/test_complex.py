@@ -35,6 +35,16 @@ class TestComplex(unittest.TestCase):
              ('def', 'database.schema.table1', 'C', 'SELECT', 2),
              ('def', 'flat_table', 'f', 'SELECT', 2)])
 
+    def test_complex_without_insert(self):
+        self.run_test('tests/resources/complex/complex_without_insert.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT', '', 'somedata', 'WITH', 1),
+             ('somedata', '', 'foo', 'SELECT', 2),
+             ('foo', 'database.schema.table', 'bar', 'SELECT', 3),
+             ('ROOT', '', 'def', 'SELECT', 1),
+             ('def', 'database.schema.table1', 'C', 'SELECT', 2),
+             ('def', 'flat_table', 'f', 'SELECT', 2)])
+
     def test_huge_query(self):
         self.run_test('tests/resources/complex/reuse_alias_and_literals.sql', 
             [('ROOT', 'ROOT', 'ROOT', 'NONE', 0), 

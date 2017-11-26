@@ -106,12 +106,22 @@ void push_ident(const char *ident) {
                 // This is a select following a previous with
                 // build a new child model
                 // printf("Building new model for with scope\n");
-                current->child = (struct fsm *)calloc(1, sizeof(struct fsm));
-                current->child->parent = current;
-                current = current->child;
-                current->level = current->parent->level + 1;
-                current->scope_ctr = current->level;
-                current->op = SELECT;
+                if (current->child != NULL) {
+                    current->sibling = (struct fsm *)calloc(1, sizeof(struct fsm));
+                    current->sibling->parent = current->parent;
+                    current->sibling->scope_ctr = current->scope_ctr;
+                    current = current->sibling;
+                    current->level = current->parent->level + 1;
+                    current->scope_ctr = current->level;
+                    current->op = SELECT;
+                } else {
+                    current->child = (struct fsm *)calloc(1, sizeof(struct fsm));
+                    current->child->parent = current;
+                    current = current->child;
+                    current->level = current->parent->level + 1;
+                    current->scope_ctr = current->level;
+                    current->op = SELECT;
+                }
                 break;
             case UNION:
                 // This is a select following a union
