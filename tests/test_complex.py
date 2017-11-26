@@ -15,7 +15,6 @@ class TestComplex(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
-        print(self.result)
         self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):
@@ -35,3 +34,18 @@ class TestComplex(unittest.TestCase):
              ('ROOT', '', 'def', 'SELECT', 1),
              ('def', 'database.schema.table1', 'C', 'SELECT', 2),
              ('def', 'flat_table', 'f', 'SELECT', 2)])
+
+    def test_huge_query(self):
+        self.run_test('tests/resources/complex/reuse_alias_and_literals.sql', 
+            [('ROOT', 'ROOT', 'ROOT', 'NONE', 0), 
+             ('ROOT', 'foo', 'foo', 'INSERT', 1), 
+             ('ROOT', '', 'qwetuvtype', 'SELECT', 1), 
+             ('qwetuvtype', 'database.schema.app_abc', 'pgru', 'SELECT', 2), 
+             ('ROOT', '', 'brands', 'SELECT', 1), 
+             ('brands', 'database.schema.app_abc', 'pgru', 'SELECT', 2), 
+             ('ROOT', '', 'brands', 'SELECT', 1), 
+             ('brands', 'database.schema.app_abc', 'pgru', 'SELECT', 2), 
+             ('ROOT', '', 'fghs', 'SELECT', 1), 
+             ('fghs', 'database.schema.app_abc', 'fgh2', 'SELECT', 2), 
+             ('fgh2', 'database.schema.app_fgh', 'tt', 'SELECT', 3), 
+             ('tt', 'database.schema.app_fgh', 't', 'SELECT', 4)])

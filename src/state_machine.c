@@ -41,6 +41,8 @@ void push_ident(const char *ident) {
         return;
     }
 
+    // printf("%s\n", ident);
+
     if (strcasecmp(ident, "insert") == 0 ) {
         switch( current->op ) {
             case NONE:

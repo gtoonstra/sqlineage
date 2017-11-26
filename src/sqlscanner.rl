@@ -54,7 +54,7 @@ static PyObject *callback = NULL;
     };
 
     # Single Quote.
-    sliteralChar = [^'\\] | newline | ( '\\' . any_count_line );
+    sliteralChar = [^'];
     '\'' . sliteralChar* . '\'' {
 /*
         printf( "single_lit(%i): ", curline );
@@ -64,7 +64,7 @@ static PyObject *callback = NULL;
     };
 
     # Double Quote.
-    dliteralChar = [^"\\] | newline | ( '\\' any_count_line );
+    dliteralChar = [^"\\];
     '"' . dliteralChar* . '"' {
 /*
         printf( "double_lit(%i): ", curline );
@@ -164,7 +164,7 @@ int scanner(const char *sql)
         space = MIN(space, sqllen-pointer);
         strncpy(p, &sql[pointer], space);
         p[space] = '\0';
-        // printf("%s\n", p);
+        // printf("\n\n%s\n", p);
         len = strlen(p);
         pointer += len;
         pe = p + len;

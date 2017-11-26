@@ -54,6 +54,13 @@ class TestSimpleMulti(unittest.TestCase):
              ('ROOT','foo','foo','INSERT',1),
              ('ROOT','bar','bar','SELECT',1)])
 
+    def test_select_without_alias(self):
+        self.run_test('tests/resources/simple_multi/insert_select_without_alias.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','','s','SELECT',1),
+             ('s','database.schema.app_xyz','s','SELECT',2)])
+
 
 if __name__ == '__main__':
     unittest.main()
