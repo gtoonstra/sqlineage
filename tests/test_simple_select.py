@@ -49,5 +49,11 @@ class TestSimpleSelect(unittest.TestCase):
             [('ROOT','ROOT','ROOT','NONE',0),
              ('ROOT','foo','foo','SELECT',1)])
 
+    def test_simple_with_where(self):
+        self.run_test('tests/resources/simple_select/simple_with_where.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','some_table','some_table','SELECT',1)])
+
+
 if __name__ == '__main__':
     unittest.main()

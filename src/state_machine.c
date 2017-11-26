@@ -213,18 +213,20 @@ void push_ident(const char *ident) {
         // AS is useless in this context
         return;
     }
-    if (current->next == NEXT_IS_TABLENAME) {
-        strcpy(current->table, ident);
-        strcpy(current->alias, ident);
-        // printf("table: %s\n", current->table);
-        current->next = NEXT_IS_ALIAS;
-        return;
-    }
-    if (current->next == NEXT_IS_ALIAS) {
-        strcpy(current->alias, ident);
-        // printf("alias: %s\n", current->alias);
-        current->next = NEXT_IS_FIELD;
-        return;
+    if (!current->in_where) {
+        if (current->next == NEXT_IS_TABLENAME) {
+            strcpy(current->table, ident);
+            strcpy(current->alias, ident);
+            // printf("table: %s\n", current->table);
+            current->next = NEXT_IS_ALIAS;
+            return;
+        }
+        if (current->next == NEXT_IS_ALIAS) {
+            strcpy(current->alias, ident);
+            // printf("alias: %s\n", current->alias);
+            current->next = NEXT_IS_FIELD;
+            return;
+        }
     }
 }
 
