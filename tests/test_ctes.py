@@ -16,7 +16,7 @@ class TestCTEs(unittest.TestCase):
 
     def verify_result(self, expected):
         print(self.result)
-        self.assertEqual(self.result, expected)
+        self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):
         self.clear_result()
@@ -30,5 +30,14 @@ class TestCTEs(unittest.TestCase):
             [('ROOT','ROOT','ROOT','NONE',0),
              ('ROOT','','foo','WITH',1),
              ('foo','mytable','mytable','SELECT',2),
+             ('ROOT','other_table','other_table','INSERT',1),
+             ('ROOT','foo','foo','SELECT',1)])
+
+    def test_subselects_in_with(self):
+        self.run_test('tests/resources/cte_statements/subselects_in_with.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','','foo','WITH',1),
+             ('foo','','bar','SELECT',2),
+             ('bar','mytable','mytable','SELECT',3),
              ('ROOT','other_table','other_table','INSERT',1),
              ('ROOT','foo','foo','SELECT',1)])

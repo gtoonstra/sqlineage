@@ -21,19 +21,20 @@ static PyObject *callback = NULL;
     any_count_line = any | newline;
 
     # Consume a C comment.
-    c_comment := any_count_line* :>> '*/' @{fgoto main;};
+    block_comment := any_count_line* :>> '*/' @{fgoto main;};
+    line_comment := [^\n]* :>> '\n' @{fgoto main;};
 
     main := |*
 
     # Alpha numberic characters or underscore.
-    alnum_u = alnum | '_' | '\.';
+    alnum_u = alnum | '_' | '\.' | '[' | ']';
 
     # Alpha charactres or underscore.
-    alpha_u = alpha | '_';
+    alpha_u = alpha | '_' | '[' | ']';
 
     # Symbols. Upon entering clear the buffer. On all transitions
     # buffer a character. Upon leaving dump the symbol.
-    ( punct - [_'"\.] ) {
+    ( punct - [_'"\.\[\]] ) {
         // printf( "symbol(%i): %c\n", curline, ts[0] );
         push_symbol(ts[0]);
     };
@@ -72,15 +73,28 @@ static PyObject *callback = NULL;
 */
     };
 
+    # back tick literal.
+    dBackTickLiteral = [^`\\] | newline | ( '\\' any_count_line );
+    '`' . dBackTickLiteral* . '`' {
+        memset(arg, 0x00, BUFSIZE);
+        strncpy(arg, ts, te-ts);    
+/*
+        printf( "backtick(%i): ", curline );
+        fwrite(arg, 1, strlen(arg), stdout);
+        printf("\n");
+*/
+        push_backtick_literal(arg);
+    };
+
     # Whitespace is standard ws, newlines and control codes.
     any_count_line - 0x21..0x7e;
 
     # Describe both c style comments and c++ style comments. The
-    # priority bump on tne terminator of the comments brings us
+    # priority bump on the terminator of the comments brings us
     # out of the extend* which matches everything.
     '//' [^\n]* newline;
-
-    '/*' { fgoto c_comment; };
+    '--' { fgoto line_comment; };
+    '/*' { fgoto block_comment; };
 
     # Match an integer. We don't bother clearing the buf or filling it.
     # The float machine overlaps with int and it will do it.
@@ -150,6 +164,7 @@ int scanner(const char *sql)
         space = MIN(space, sqllen-pointer);
         strncpy(p, &sql[pointer], space);
         p[space] = '\0';
+        // printf("%s\n", p);
         len = strlen(p);
         pointer += len;
         pe = p + len;
@@ -173,7 +188,6 @@ int scanner(const char *sql)
         else {
             // There is a prefix to preserve, shift it over.
             have = pe - ts;
-            printf("have: %d, %08x, %08x\n", have, buf, ts);
             memmove( buf, ts, have );
             te = buf + (te-ts);
             ts = buf;

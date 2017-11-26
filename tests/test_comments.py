@@ -15,7 +15,7 @@ class TestComments(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
-        self.assertEqual(self.result, expected)
+        self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):
         self.clear_result()
@@ -32,3 +32,13 @@ class TestComments(unittest.TestCase):
              ('foo','foo.bar.tablename','b','SELECT',2),
              ('foo','abc.dbo.xyz','c','SELECT',2),
              ('foo','abc.def.xyz','d','SELECT',2)])
+
+    def test_very_long_comment(self):
+        self.run_test('tests/resources/comments/very_long_comment.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','foo','foo','INSERT',1)])
+
+    def test_very_long_block_comment(self):
+        self.run_test('tests/resources/comments/very_long_block_comment.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','foo','foo','INSERT',1)])

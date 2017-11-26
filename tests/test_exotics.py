@@ -15,8 +15,7 @@ class TestExotics(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
-        print(self.result)
-        self.assertEqual(self.result, expected)
+        self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):
         self.clear_result()
@@ -33,3 +32,18 @@ class TestExotics(unittest.TestCase):
              ('foo','foo.bar.tablename','b','SELECT',2),
              ('foo','abc.dbo.xyz','c','SELECT',2),
              ('foo','abc.def.xyz','d','SELECT',2)])
+
+    def test_brackets(self):
+        self.run_test('tests/resources/exotics/brackets.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','[server].[database].[schema].[table]','[server].[database].[schema].[table]','SELECT',1)])
+
+    def test_backtick(self):
+        self.run_test('tests/resources/exotics/backtick.sql', 
+            [('ROOT','ROOT','ROOT','NONE',0),
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT',
+                '`database.schema with a space.table with something else`',
+                '`database.schema with a space.table with something else`',
+                'SELECT',1)])
