@@ -1,0 +1,1 @@
+iNsERt iNtO foo( a ) vAlUEs ('b')

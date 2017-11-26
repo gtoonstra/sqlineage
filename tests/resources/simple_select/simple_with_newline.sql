@@ -1,0 +1,11 @@
+
+select
+
+a
+
+from 
+
+foo
+
+;
+

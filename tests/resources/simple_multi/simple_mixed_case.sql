@@ -1,0 +1,1 @@
+InSerT InTo foo SeLEcT a FrOm bar
