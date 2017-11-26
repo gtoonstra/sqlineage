@@ -27,32 +27,32 @@ class TestSimpleMulti(unittest.TestCase):
     def test_simple(self):
         self.run_test('tests/resources/simple_multi/simple.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','INSERT',1),
-             ('ROOT','bar','','SELECT',1)])
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','bar','bar','SELECT',1)])
 
     def test_simple_mixed_case(self):
         self.run_test('tests/resources/simple_multi/simple_mixed_case.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','INSERT',1),
-             ('ROOT','bar','','SELECT',1)])
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','bar','bar','SELECT',1)])
 
     def test_simple_newline(self):
         self.run_test('tests/resources/simple_multi/simple_with_newline.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','INSERT',1),
-             ('ROOT','bar','','SELECT',1)])
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','bar','bar','SELECT',1)])
 
     def test_simple_semicolon(self):
         self.run_test('tests/resources/simple_multi/simple_with_semicolon.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','INSERT',1),
-             ('ROOT','bar','','SELECT',1)])
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','bar','bar','SELECT',1)])
 
     def test_simple_spacing(self):
         self.run_test('tests/resources/simple_multi/simple_with_spacing.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','INSERT',1),
-             ('ROOT','bar','','SELECT',1)])
+             ('ROOT','foo','foo','INSERT',1),
+             ('ROOT','bar','bar','SELECT',1)])
 
 
 if __name__ == '__main__':

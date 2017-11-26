@@ -3,7 +3,7 @@
 
 #include <Python.h>
 
-void initialize_fsm();
+void initialize_fsm(void);
 void push_ident(const char *ident);
 void push_symbol(const char symbol);
 void send_model(PyObject *callback);

@@ -27,27 +27,27 @@ class TestSimpleSelect(unittest.TestCase):
     def test_simple(self):
         self.run_test('tests/resources/simple_select/simple.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','SELECT',1)])
+             ('ROOT','foo','foo','SELECT',1)])
 
     def test_simple_mixed_case(self):
         self.run_test('tests/resources/simple_select/simple_mixed_case.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','SELECT',1)])
+             ('ROOT','foo','foo','SELECT',1)])
 
     def test_simple_newline(self):
         self.run_test('tests/resources/simple_select/simple_with_newline.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','SELECT',1)])
+             ('ROOT','foo','foo','SELECT',1)])
 
     def test_simple_semicolon(self):
         self.run_test('tests/resources/simple_select/simple_with_semicolon.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','SELECT',1)])
+             ('ROOT','foo','foo','SELECT',1)])
 
     def test_simple_spacing(self):
         self.run_test('tests/resources/simple_select/simple_with_spacing.sql', 
             [('ROOT','ROOT','','NONE',0),
-             ('ROOT','foo','','SELECT',1)])
+             ('ROOT','foo','foo','SELECT',1)])
 
 if __name__ == '__main__':
     unittest.main()

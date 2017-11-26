@@ -26,14 +26,14 @@ static PyObject *callback = NULL;
     main := |*
 
     # Alpha numberic characters or underscore.
-    alnum_u = alnum | '_';
+    alnum_u = alnum | '_' | '\.';
 
     # Alpha charactres or underscore.
     alpha_u = alpha | '_';
 
     # Symbols. Upon entering clear the buffer. On all transitions
     # buffer a character. Upon leaving dump the symbol.
-    ( punct - [_'"] ) {
+    ( punct - [_'"\.] ) {
         // printf( "symbol(%i): %c\n", curline, ts[0] );
         push_symbol(ts[0]);
     };
@@ -99,7 +99,7 @@ static PyObject *callback = NULL;
         printf( "float(%i): ", curline );
         fwrite( ts, 1, te-ts, stdout );
         printf("\n");
-/*
+*/
     };
 
     # Match a hex. Upon entering the hex part, clear the buf, buffer characters
@@ -122,14 +122,14 @@ static PyObject *callback = NULL;
 
 int scanner(const char *sql)
 {
-    static char buf[BUFSIZE];
+    static char buf[BUFSIZE+1];
     int cs, act, have = 0, curline = 1;
     char *ts, *te = 0;
     int done = 0;
     int pointer = 0;
     int sqllen = strlen(sql);
 
-    char arg[BUFSIZE] = {"\0"};
+    char arg[BUFSIZE+1] = {"\0"};
 
     initialize_fsm();
 
@@ -142,12 +142,13 @@ int scanner(const char *sql)
         if ( space == 0 ) {
             // We've used up the entire buffer storing an already-parsed token
             // prefix that must be preserved.
+            printf("Out of buffer space!\n");
             PyErr_SetString(SqlineageError, "Out of buffer space.");
             return -1;
         }
 
         space = MIN(space, sqllen-pointer);
-        len = strncpy(p, &sql[pointer], space);
+        strncpy(p, &sql[pointer], space);
         p[space] = '\0';
         len = strlen(p);
         pointer += len;
@@ -162,6 +163,7 @@ int scanner(const char *sql)
         %% write exec;
 
         if ( cs == clang_error ) {
+            printf("Error when parsing\n");
             PyErr_SetString(SqlineageError, "Error when parsing.");
             return -1;
         }
@@ -171,6 +173,7 @@ int scanner(const char *sql)
         else {
             // There is a prefix to preserve, shift it over.
             have = pe - ts;
+            printf("have: %d, %08x, %08x\n", have, buf, ts);
             memmove( buf, ts, have );
             te = buf + (te-ts);
             ts = buf;
@@ -197,7 +200,7 @@ sqlineage_parse(PyObject *self, PyObject *args)
     Py_XINCREF(temp);      /* Add a reference to new callback */
     Py_XDECREF(callback);  /* Dispose of previous callback */
     callback = temp;       /* Remember new callback */
-    
+
     if (scanner(sql) != 0) {
         return NULL;
     }
