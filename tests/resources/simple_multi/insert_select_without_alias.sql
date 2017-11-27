@@ -10,6 +10,6 @@ SELECT
     (SELECT
          s.b
        FROM
-         database.schema.app_xyz s) s
+         database.schema.app_xyz s) cxz
     INNER JOIN database.schema.app_xyz abc ON abc.xyzcategoryid = s.b
     LEFT JOIN database.schema.app_zxc def ON def.c = abc.c;

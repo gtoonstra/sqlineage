@@ -12,6 +12,7 @@ typedef enum {NEXT_IS_FIELD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS} next_t;
 struct fsm {
     char table[BUFLEN+1];
     char alias[BUFLEN+1];
+    char query_alias[BUFLEN+1];
     operation_t op;
     next_t next;
     int level;
@@ -302,7 +303,7 @@ void send_model(PyObject *callback) {
 
         // printf("%s, %s, %d, %d\n", cur->table, cur->alias, cur->level, cur->scope_ctr);
 
-        arglist = Py_BuildValue("(ssssi)", cur->parent->alias, cur->table, cur->alias, operation, cur->level);
+        arglist = Py_BuildValue("(sssssi)", cur->parent->alias, cur->table, cur->alias, cur->query_alias, operation, cur->level);
         if (arglist == NULL) {
             printf("Arg list could not be built. An exception occurred\n");
             break;

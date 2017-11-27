@@ -8,7 +8,7 @@ class TestComplex(unittest.TestCase):
         super(TestComplex, self).__init__(*args, **kwargs)
         self.result = []
 
-    def callback(self, parent, table, alias, operation, level):
+    def callback(self, parent, table, alias, query_alias, operation, level):
         self.result.append((parent, table, alias, operation, level))
 
     def clear_result(self):
@@ -58,4 +58,4 @@ class TestComplex(unittest.TestCase):
              ('ROOT', '', 'fghs', 'SELECT', 1), 
              ('fghs', 'database.schema.app_abc', 'fgh2', 'SELECT', 2), 
              ('fgh2', 'database.schema.app_fgh', 'tt', 'SELECT', 3), 
-             ('tt', 'database.schema.app_fgh', 't', 'SELECT', 4)])
+             ('tt', 'database.schema.app_fgha', 't', 'SELECT', 4)])

@@ -8,7 +8,7 @@ class TestComments(unittest.TestCase):
         super(TestComments, self).__init__(*args, **kwargs)
         self.result = []
 
-    def callback(self, parent, table, alias, operation, level):
+    def callback(self, parent, table, alias, query_alias, operation, level):
         self.result.append((parent, table, alias, operation, level))
 
     def clear_result(self):

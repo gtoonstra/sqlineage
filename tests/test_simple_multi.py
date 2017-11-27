@@ -8,7 +8,7 @@ class TestSimpleMulti(unittest.TestCase):
         super(TestSimpleMulti, self).__init__(*args, **kwargs)
         self.result = []
 
-    def callback(self, parent, table, alias, operation, level):
+    def callback(self, parent, table, alias, query_alias, operation, level):
         self.result.append((parent, table, alias, operation, level))
 
     def clear_result(self):
@@ -58,8 +58,8 @@ class TestSimpleMulti(unittest.TestCase):
         self.run_test('tests/resources/simple_multi/insert_select_without_alias.sql', 
             [('ROOT','ROOT','ROOT','NONE',0),
              ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','','s','SELECT',1),
-             ('s','database.schema.app_xyz','s','SELECT',2)])
+             ('ROOT','','cxz','SELECT',1),
+             ('cxz','database.schema.app_xyz','s','SELECT',2)])
 
 
 if __name__ == '__main__':

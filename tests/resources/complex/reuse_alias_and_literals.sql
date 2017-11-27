@@ -74,7 +74,7 @@ FROM
       FROM database.schema.app_fgh t
       CROSS JOIN
         (SELECT *
-         FROM database.schema.app_fgh t
+         FROM database.schema.app_fgha t
          WHERE t.fghid IN (1,
                            2044,
                            2045)) tt
