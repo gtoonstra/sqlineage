@@ -9,7 +9,7 @@ class TestSimpleMulti(unittest.TestCase):
         self.result = []
 
     def callback(self, parent, table, alias, query_alias, operation, level):
-        self.result.append((parent, table, alias, operation, level))
+        self.result.append((parent, table, alias, query_alias, operation, level))
 
     def clear_result(self):
         self.result = []
@@ -26,40 +26,40 @@ class TestSimpleMulti(unittest.TestCase):
 
     def test_simple(self):
         self.run_test('tests/resources/simple_multi/simple.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','bar','bar','SELECT',1)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','bar','bar','','SELECT',1)])
 
     def test_simple_mixed_case(self):
         self.run_test('tests/resources/simple_multi/simple_mixed_case.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','bar','bar','SELECT',1)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','bar','bar','','SELECT',1)])
 
     def test_simple_newline(self):
         self.run_test('tests/resources/simple_multi/simple_with_newline.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','bar','bar','SELECT',1)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','bar','bar','','SELECT',1)])
 
     def test_simple_semicolon(self):
         self.run_test('tests/resources/simple_multi/simple_with_semicolon.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','bar','bar','SELECT',1)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','bar','bar','','SELECT',1)])
 
     def test_simple_spacing(self):
         self.run_test('tests/resources/simple_multi/simple_with_spacing.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','bar','bar','SELECT',1)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','bar','bar','','SELECT',1)])
 
     def test_select_without_alias(self):
         self.run_test('tests/resources/simple_multi/insert_select_without_alias.sql', 
-            [('ROOT','ROOT','ROOT','NONE',0),
-             ('ROOT','foo','foo','INSERT',1),
-             ('ROOT','','cxz','SELECT',1),
-             ('cxz','database.schema.app_xyz','s','SELECT',2)])
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT','foo','foo','','INSERT',1),
+             ('ROOT','','','','SELECT',1),
+             ('','database.schema.app_xyz','s','cxz','SELECT',2)])
 
 
 if __name__ == '__main__':

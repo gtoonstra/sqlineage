@@ -7,7 +7,7 @@
 
 
 typedef enum {NONE, INSERT, SELECT, WITH, UNION} operation_t;
-typedef enum {NEXT_IS_FIELD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS} next_t;
+typedef enum {NEXT_IS_FIELD, NEXT_IS_QUERY_ALIAS_CHILD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS} next_t;
 
 struct fsm {
     char table[BUFLEN+1];
@@ -238,6 +238,18 @@ void push_ident(const char *ident) {
             current->next = NEXT_IS_FIELD;
             return;
         }
+        if (current->next == NEXT_IS_QUERY_ALIAS_CHILD) {
+            if (current->child != NULL ) {
+                struct fsm *child = current->child;
+                while( child != NULL ) {
+                    strcpy(child->query_alias, ident);
+                    // printf("child alias: %s\n", current->alias);
+                    child = child->sibling;
+                }
+                current->next = NEXT_IS_FIELD;
+                return;
+            }
+        }
     }
 }
 
@@ -259,7 +271,7 @@ void push_symbol(const char symbol)
                 current = current->sibling;
             }
             current->scope_ctr--;
-            current->next = NEXT_IS_ALIAS;
+            current->next = NEXT_IS_QUERY_ALIAS_CHILD;
             current->in_where = 0;
         }
         return;
@@ -303,7 +315,13 @@ void send_model(PyObject *callback) {
 
         // printf("%s, %s, %d, %d\n", cur->table, cur->alias, cur->level, cur->scope_ctr);
 
-        arglist = Py_BuildValue("(sssssi)", cur->parent->alias, cur->table, cur->alias, cur->query_alias, operation, cur->level);
+        arglist = Py_BuildValue("(sssssi)", 
+            cur->parent->alias, 
+            cur->table, 
+            cur->alias,
+            cur->query_alias, 
+            operation, 
+            cur->level);
         if (arglist == NULL) {
             printf("Arg list could not be built. An exception occurred\n");
             break;

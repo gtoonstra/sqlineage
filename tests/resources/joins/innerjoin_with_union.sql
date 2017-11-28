@@ -2,7 +2,7 @@ insert into foo( a, b, c )
 select
 a.d, a.e, b.f
 from 
-    foo a inner join bar b on a.x = b.x
+    zxc a inner join bar b on a.x = b.x
 where
     b.t = '2'
 union
