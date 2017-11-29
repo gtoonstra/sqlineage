@@ -353,3 +353,26 @@ void send_model(PyObject *callback) {
         }
     }
 }
+
+static void recursive_cleanup(struct fsm *cur)
+{
+    if (cur->child != NULL) {
+        recursive_cleanup(cur->child);
+        cur->child = NULL;
+    }
+    if (cur->sibling != NULL) {
+        recursive_cleanup(cur->sibling);
+    }
+    free(cur);
+}
+
+void memory_cleanup(void)
+{
+    if (root.child != NULL) {
+        recursive_cleanup(root.child);
+        root.child = NULL;
+    }
+    if (root.sibling != NULL) {
+        recursive_cleanup(root.sibling);
+    }
+}

@@ -221,6 +221,8 @@ sqlineage_scan(PyObject *self, PyObject *args)
 
     send_model(callback);
 
+    memory_cleanup();
+
     /* Boilerplate to return "None" */
     Py_INCREF(Py_None);
     result = Py_None;
