@@ -153,3 +153,5 @@ ENV/
 # mypy
 .mypy_cache/
 
+valgrind.txt
+
