@@ -35,8 +35,8 @@ pip install pytest --upgrade
 import sqlineage
 
 
-def callback(parent, table, alias, operation, level):
-    print(parent, table, alias, operation, level)
+def callback(parent, table, alias, query_alias, operation, level):
+    print(parent, table, alias, query_alias, operation, level)
 
 sqlineage.scan('SELECT * FROM foo', callback)
 ```
@@ -52,6 +52,7 @@ There are thus only five elements you get back:
 - parent: The parent of the current block being output
 - table:  The table name that is selected from or inserted into (not always available)
 - alias:  The alias to refer to a subselect or CTE
+- query_alias: A reference to a query block
 - operation: The operation taking place in that SQL block
 - level:  The hierarchical level where the code was found, useful for subselects.
 

@@ -8,6 +8,7 @@
 
 typedef enum {NONE, INSERT, SELECT, WITH, UNION} operation_t;
 typedef enum {NEXT_IS_FIELD, NEXT_IS_QUERY_ALIAS_CHILD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS} next_t;
+typedef enum {SELECT_PART, FROM_PART, WHERE_PART} sqlpart_t;
 
 struct fsm {
     char table[BUFLEN+1];
@@ -20,7 +21,7 @@ struct fsm {
     struct fsm *sibling;
     struct fsm *child;
     struct fsm *parent;
-    int in_where;
+    sqlpart_t sqlpart;
 } fsm_t;
 
 struct fsm root;
@@ -34,6 +35,7 @@ void initialize_fsm() {
     strcpy(root.table, "ROOT");
     strcpy(root.alias, "ROOT");
     root.parent = &root;
+    root.sqlpart = SELECT_PART;
 }
 
 void push_ident(const char *ident) {
@@ -76,7 +78,7 @@ void push_ident(const char *ident) {
         return;
     }
     if (strcasecmp(ident, "select") == 0 ) {
-        if (current->in_where) {
+        if (current->sqlpart == WHERE_PART) {
             // ignore everything in where statements...
             return;
         }
@@ -89,6 +91,7 @@ void push_ident(const char *ident) {
                 current->level = 1;
                 current->scope_ctr = current->level;
                 current->op = SELECT;
+                current->sqlpart = SELECT_PART;
                 // printf("SELECT case 1\n");
                 break;
             case INSERT:
@@ -101,6 +104,7 @@ void push_ident(const char *ident) {
                 current->level = current->parent->level + 1;
                 current->scope_ctr = current->level;
                 current->op = SELECT;
+                current->sqlpart = SELECT_PART;
                 // printf("SELECT case 2\n");
                 break;
             case WITH:
@@ -115,6 +119,7 @@ void push_ident(const char *ident) {
                     current->level = current->parent->level + 1;
                     current->scope_ctr = current->level;
                     current->op = SELECT;
+                    current->sqlpart = SELECT_PART;
                 } else {
                     current->child = (struct fsm *)calloc(1, sizeof(struct fsm));
                     current->child->parent = current;
@@ -122,6 +127,7 @@ void push_ident(const char *ident) {
                     current->level = current->parent->level + 1;
                     current->scope_ctr = current->level;
                     current->op = SELECT;
+                    current->sqlpart = SELECT_PART;
                 }
                 break;
             case UNION:
@@ -135,9 +141,10 @@ void push_ident(const char *ident) {
                 current->level = current->parent->level + 1;
                 current->scope_ctr = current->level;
                 current->op = SELECT;
+                current->sqlpart = SELECT_PART;
                 break;
             case SELECT:
-                if (current->scope_ctr > current->level) {
+                if ((current->scope_ctr > current->level) && (current->sqlpart == FROM_PART)) {
                     // printf("Building new model for new scope\n");
                     current->child = (struct fsm *)calloc(1, sizeof(struct fsm));
                     current->child->parent = current;
@@ -145,6 +152,7 @@ void push_ident(const char *ident) {
                     current->level = current->parent->level + 1;
                     current->scope_ctr = current->level;
                     current->op = SELECT;
+                    current->sqlpart = SELECT_PART;
                     break;
                 }
                 if (current->scope_ctr == current->level) {
@@ -155,9 +163,9 @@ void push_ident(const char *ident) {
                     current->level = current->parent->level + 1;
                     current->scope_ctr = current->level;
                     current->op = SELECT;
+                    current->sqlpart = SELECT_PART;
                     break;
                 }
-                printf("Don't know what to do 2\n");
                 break;
             default:
                 printf("Don't know what to do 3\n");
@@ -166,10 +174,14 @@ void push_ident(const char *ident) {
         return;
     }
     if (strcasecmp(ident, "from") == 0 ) {
-        if (current->in_where) {
+        if (current->sqlpart == WHERE_PART) {
             // ignore everything in where statements...
             return;
         }
+        if ((current->sqlpart == SELECT_PART) && (current->level < current->scope_ctr)) {
+            return;
+        }
+        current->sqlpart = FROM_PART;
         switch( current->op ) {
             case SELECT:
                 current->next = NEXT_IS_TABLENAME;
@@ -185,13 +197,16 @@ void push_ident(const char *ident) {
         if (current->op == SELECT) {
             current->op = UNION;
             current->next = NEXT_IS_FIELD;
-            current->in_where = 0;
+            current->sqlpart = SELECT_PART;
         }
         return;
     }
     if (strcasecmp(ident, "where") == 0 ) {
+        if (current->sqlpart != FROM_PART) {
+            return;
+        }
         if (current->op == SELECT) {
-            current->in_where = 1;
+            current->sqlpart = WHERE_PART;
         }
         return;
     }
@@ -224,7 +239,7 @@ void push_ident(const char *ident) {
         // AS is useless in this context
         return;
     }
-    if (!current->in_where) {
+    if (current->sqlpart != WHERE_PART) {
         if (current->next == NEXT_IS_TABLENAME) {
             strcpy(current->table, ident);
             strcpy(current->alias, ident);
@@ -265,14 +280,14 @@ void push_symbol(const char symbol)
     if (symbol == ')') {
         current->scope_ctr--;
         if (current->scope_ctr < current->level) {
-            current->in_where = 0;
+            current->sqlpart = SELECT_PART;
             current = current->parent;
             while (current->sibling != NULL) {
                 current = current->sibling;
             }
             current->scope_ctr--;
             current->next = NEXT_IS_QUERY_ALIAS_CHILD;
-            current->in_where = 0;
+            current->sqlpart = SELECT_PART;
         }
         return;
     }

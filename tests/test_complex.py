@@ -60,3 +60,13 @@ class TestComplex(unittest.TestCase):
              ('', 'database.schema.app_abc', 'pgru', 'fghs', 'SELECT', 2), 
              ('pgru', 'database.schema.app_fgh', 't', 'fgh2', 'SELECT', 3), 
              ('t', 'database.schema.app_fgha', 't', 'tt', 'SELECT', 4)])
+
+    def test_select_if_multiple_with_insert_select(self):
+        self.run_test('tests/resources/complex/select_if_multiple_with_insert_select.sql', 
+            [('ROOT','ROOT','ROOT','','NONE',0),
+             ('ROOT', '', 'somedata', '','WITH', 1),
+             ('somedata', '', '', '','SELECT', 2),
+             ('', 'database.schema.table', 'bar', 'foo','SELECT', 3),
+             ('ROOT', '', '', '','SELECT', 1),
+             ('', 'database.schema.table1', 'C', 'def','SELECT', 2),
+             ('', 'flat_table', 'f', 'def','SELECT', 2)])
