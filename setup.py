@@ -5,7 +5,8 @@ sqlineage = Extension('sqlineage',
                                      ('MINOR_VERSION', '1')],
                       include_dirs=['/usr/local/include'],
                       library_dirs=['/usr/local/lib'],
-                      sources=['src/sqlscanner.c', 'src/state_machine.c'])
+                      sources=['src/sqlscanner.c', 
+                               'src/state_machine.c'])
 
 setup(name='sqlineage',
       version='0.1.0',
