@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 sqlineage = Extension('sqlineage',
                       define_macros=[('MAJOR_VERSION', '0'),
@@ -20,7 +20,6 @@ setup(name='sqlineage',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3'
       ],
-      packages=['sqlineage'],
       keywords='sql scanner parser',
       python_requires='>=3',
       long_description='''
