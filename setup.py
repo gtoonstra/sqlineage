@@ -15,12 +15,14 @@ setup(name='sqlineage',
       url='https://github.com/gtoonstra/sqlineage',
       license='Apache2',
       classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: ',
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3'
       ],
       packages=['sqlineage'],
+      keywords='sql scanner parser',
+      python_requires='>=3',
       long_description='''
 This package parses SQL files and allows you to build a hierarchy
 of select and insert statements that lists the identifiers, so you
