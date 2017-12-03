@@ -21,8 +21,8 @@ IF ( DATEDIFF(MONTH, @z, GETDATE()) > 1 )
                     FROM    db.schema.foo foo
                             INNER JOIN afoo ON afoo.e = foo.e
                             INNER JOIN bfoo ON bfoo.f = foo.f
-                    WHERE               
+                    WHERE
                             foo.v = GETDATE()
                             AND foo.w IS NOT NULL;
-   
+
     END; 

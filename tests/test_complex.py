@@ -64,9 +64,10 @@ class TestComplex(unittest.TestCase):
     def test_select_if_multiple_with_insert_select(self):
         self.run_test('tests/resources/complex/select_if_multiple_with_insert_select.sql', 
             [('ROOT','ROOT','ROOT','','NONE',0),
-             ('ROOT', '', 'somedata', '','WITH', 1),
-             ('somedata', '', '', '','SELECT', 2),
-             ('', 'database.schema.table', 'bar', 'foo','SELECT', 3),
-             ('ROOT', '', '', '','SELECT', 1),
-             ('', 'database.schema.table1', 'C', 'def','SELECT', 2),
-             ('', 'flat_table', 'f', 'def','SELECT', 2)])
+             ('ROOT', 'db.s.foo', 'db.s.foo', '', 'SELECT', 1),
+             ('ROOT', '', 'afoo', '', 'WITH', 1),
+             ('afoo', 'db.schema.bar', 'bar', '', 'SELECT', 2),
+             ('ROOT', '', 'bfoo', '', 'WITH', 1),
+             ('bfoo', 'db.schema.bas', 'bas', '', 'SELECT', 2),
+             ('ROOT','db2.foo.zxc','db2.foo.zxc','','INSERT',1),
+             ('ROOT', 'db.schema.foo', 'foo', '', 'SELECT', 1)])

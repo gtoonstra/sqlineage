@@ -7,7 +7,7 @@
 
 
 typedef enum {NONE, INSERT, SELECT, WITH, UNION} operation_t;
-typedef enum {NEXT_IS_FIELD, NEXT_IS_QUERY_ALIAS_CHILD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS} next_t;
+typedef enum {NEXT_IS_FIELD, NEXT_IS_QUERY_ALIAS_CHILD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS, NEXT_COMPLETE, NEXT_SCOPE_ENDED} next_t;
 typedef enum {SELECT_PART, FROM_PART, WHERE_PART} sqlpart_t;
 
 struct fsm {
@@ -47,6 +47,7 @@ void push_ident(const char *ident) {
     // printf("%s\n", ident);
 
     if (strcasecmp(ident, "insert") == 0 ) {
+        // printf("%s:%s\n", current->alias, current->query_alias);
         switch( current->op ) {
             case NONE:
                 root.child = (struct fsm *)calloc(1, sizeof(struct fsm));
@@ -120,6 +121,7 @@ void push_ident(const char *ident) {
                     current->scope_ctr = current->level;
                     current->op = SELECT;
                     current->sqlpart = SELECT_PART;
+                    // printf("with case 1\n");
                 } else {
                     current->child = (struct fsm *)calloc(1, sizeof(struct fsm));
                     current->child->parent = current;
@@ -128,6 +130,7 @@ void push_ident(const char *ident) {
                     current->scope_ctr = current->level;
                     current->op = SELECT;
                     current->sqlpart = SELECT_PART;
+                    // printf("with case 2\n");
                 }
                 break;
             case UNION:
@@ -211,6 +214,7 @@ void push_ident(const char *ident) {
         return;
     }
     if (strcasecmp(ident, "with") == 0) {
+        // printf("WITH\n");
         if (current->op == NONE) {
             root.child = (struct fsm *)calloc(1, sizeof(struct fsm));
             current = root.child;
@@ -222,8 +226,20 @@ void push_ident(const char *ident) {
             // printf("WITH case 1\n");
             return;
         }
-
-        if ((current->op == SELECT) && (current->next >= NEXT_IS_TABLENAME)) {
+        if ((current->op == SELECT) && 
+            ((current->next == NEXT_IS_TABLENAME) ||
+             (current->next == NEXT_IS_ALIAS))) {
+            current->sibling = (struct fsm *)calloc(1, sizeof(struct fsm));
+            current->sibling->parent = current->parent;
+            current = current->sibling;
+            current->level = current->parent->level + 1;
+            current->scope_ctr = current->level;
+            current->op = WITH;
+            current->next = NEXT_IS_ALIAS;
+            // printf("WITH case 2\n");
+            return;
+        }
+        if ((current->op == SELECT) && (current->next == NEXT_SCOPE_ENDED)) {
             current->sibling = (struct fsm *)calloc(1, sizeof(struct fsm));
             current->sibling->parent = current->parent;
             current = current->sibling;
@@ -250,7 +266,7 @@ void push_ident(const char *ident) {
         if (current->next == NEXT_IS_ALIAS) {
             strcpy(current->alias, ident);
             // printf("alias: %s\n", current->alias);
-            current->next = NEXT_IS_FIELD;
+            current->next = NEXT_COMPLETE;
             return;
         }
         if (current->next == NEXT_IS_QUERY_ALIAS_CHILD) {
@@ -265,6 +281,9 @@ void push_ident(const char *ident) {
                 return;
             }
         }
+    }
+    if (strcasecmp(ident, "if") || strcasecmp(ident, "begin")) {
+        current->next = NEXT_SCOPE_ENDED;
     }
 }
 
@@ -290,6 +309,19 @@ void push_symbol(const char symbol)
             current->sqlpart = SELECT_PART;
         }
         return;
+    }
+    if ((symbol == ',') && (current->op == WITH)) {
+        // Add another with scope here...
+        current->sibling = (struct fsm *)calloc(1, sizeof(struct fsm));
+        current->sibling->parent = current->parent;
+        current = current->sibling;
+        current->level = current->parent->level + 1;
+        current->scope_ctr = current->level;
+        current->op = WITH;
+        current->next = NEXT_IS_ALIAS;
+    }
+    if (symbol == ';') {
+        current->next = NEXT_IS_FIELD;
     }
 }
 
