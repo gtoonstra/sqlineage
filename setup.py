@@ -9,7 +9,7 @@ sqlineage = Extension('sqlineage',
                                'src/state_machine.c'])
 
 setup(name='sqlineage',
-      version='0.1.0',
+      version='0.2.0',
       description='A scanner for SQL',
       author='G. Toonstra',
       author_email='gtoonstra@gmail.com',

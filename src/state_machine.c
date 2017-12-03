@@ -4,11 +4,24 @@
 
 
 #define BUFLEN      128
-
+#define REALLY_LARGE_BUFFER     8192
 
 typedef enum {NONE, INSERT, SELECT, WITH, UNION} operation_t;
-typedef enum {NEXT_IS_FIELD, NEXT_IS_QUERY_ALIAS_CHILD, NEXT_IS_TABLENAME, NEXT_IS_ALIAS, NEXT_COMPLETE, NEXT_SCOPE_ENDED} next_t;
+typedef enum {NEXT_IS_FIELD, 
+        NEXT_IS_QUERY_ALIAS_CHILD, 
+        NEXT_IS_TABLENAME,
+        NEXT_IS_ALIAS, 
+        NEXT_COMPLETE, 
+        NEXT_SCOPE_ENDED,
+        NEXT_JOIN_TABLENAME,
+        NEXT_JOIN_ALIAS} next_t;
 typedef enum {SELECT_PART, FROM_PART, WHERE_PART} sqlpart_t;
+
+struct join {
+    char table[BUFLEN+1];
+    char alias[BUFLEN+1];
+    struct join *join;
+} join_t;
 
 struct fsm {
     char table[BUFLEN+1];
@@ -22,6 +35,7 @@ struct fsm {
     struct fsm *child;
     struct fsm *parent;
     sqlpart_t sqlpart;
+    struct join *join;
 } fsm_t;
 
 struct fsm root;
@@ -255,6 +269,29 @@ void push_ident(const char *ident) {
         // AS is useless in this context
         return;
     }
+    if (strcasecmp(ident, "on") == 0) {
+        // ON is useless in this context
+        current->next = NEXT_IS_FIELD;
+        return;
+    }
+    if ((strcasecmp(ident, "if") == 0) || (strcasecmp(ident, "begin") == 0)) {
+        current->next = NEXT_SCOPE_ENDED;
+        return;
+    }
+    if (strcasecmp(ident, "join") == 0) {
+        current->next = NEXT_JOIN_TABLENAME;
+        if (current->join == NULL) {
+            current->join = (struct join *)calloc(1, sizeof(struct join));
+            return;
+        }
+
+        struct join *curjoin = current->join;
+        while (curjoin->join != NULL) {
+            curjoin = curjoin->join;
+        }
+        curjoin->join = (struct join *)calloc(1, sizeof(struct join));
+        return;
+    }
     if (current->sqlpart != WHERE_PART) {
         if (current->next == NEXT_IS_TABLENAME) {
             strcpy(current->table, ident);
@@ -281,9 +318,23 @@ void push_ident(const char *ident) {
                 return;
             }
         }
-    }
-    if (strcasecmp(ident, "if") || strcasecmp(ident, "begin")) {
-        current->next = NEXT_SCOPE_ENDED;
+        if (current->next == NEXT_JOIN_TABLENAME) {
+            struct join *curjoin = current->join;
+            while (curjoin->join != NULL) {
+                curjoin = curjoin->join;
+            }
+            strcpy(curjoin->table, ident);
+            current->next = NEXT_JOIN_ALIAS;
+            return;
+        }
+        if (current->next == NEXT_JOIN_ALIAS) {
+            struct join *curjoin = current->join;
+            while (curjoin->join != NULL) {
+                curjoin = curjoin->join;
+            }
+            strcpy(curjoin->alias, ident);
+            current->next = NEXT_IS_FIELD;
+        }
     }
 }
 
@@ -337,7 +388,9 @@ void push_backtick_literal(const char *literal)
 void send_model(PyObject *callback) {
     PyObject *arglist;
     PyObject *result;
+    struct join *curjoin;
     char operation[BUFLEN+1] = {"\0"};
+    char joins[REALLY_LARGE_BUFFER+1] = {"\0"};
 
     struct fsm *cur = &root;
 
@@ -360,14 +413,35 @@ void send_model(PyObject *callback) {
                 break;
         }
 
+        memset(joins, 0x00, REALLY_LARGE_BUFFER+1);
+        curjoin = cur->join;
+        while (curjoin != NULL) {
+            if (strlen(curjoin->table) == 0) {
+                curjoin = curjoin->join;
+                continue;
+            }
+            if (strlen(joins) == 0) {
+                strcpy(joins, curjoin->table);
+                strcat(joins, "|");
+                strcat(joins, curjoin->alias);
+            } else {
+                strcat(joins, ",");
+                strcat(joins, curjoin->table);
+                strcat(joins, "|");
+                strcat(joins, curjoin->alias);
+            }
+            curjoin = curjoin->join;
+        }
+
         // printf("%s, %s, %d, %d\n", cur->table, cur->alias, cur->level, cur->scope_ctr);
 
-        arglist = Py_BuildValue("(sssssi)", 
+        arglist = Py_BuildValue("(ssssssi)", 
             cur->parent->alias, 
             cur->table, 
             cur->alias,
-            cur->query_alias, 
-            operation, 
+            cur->query_alias,
+            joins,
+            operation,
             cur->level);
         if (arglist == NULL) {
             printf("Arg list could not be built. An exception occurred\n");
