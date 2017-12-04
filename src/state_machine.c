@@ -318,22 +318,25 @@ void push_ident(const char *ident) {
                 return;
             }
         }
-        if (current->next == NEXT_JOIN_TABLENAME) {
-            struct join *curjoin = current->join;
-            while (curjoin->join != NULL) {
-                curjoin = curjoin->join;
+        if (current->sqlpart == FROM_PART) {
+            if (current->next == NEXT_JOIN_TABLENAME) {
+                struct join *curjoin = current->join;
+                while (curjoin->join != NULL) {
+                    curjoin = curjoin->join;
+                }
+                strcpy(curjoin->table, ident);
+                current->next = NEXT_JOIN_ALIAS;
+                return;
             }
-            strcpy(curjoin->table, ident);
-            current->next = NEXT_JOIN_ALIAS;
-            return;
-        }
-        if (current->next == NEXT_JOIN_ALIAS) {
-            struct join *curjoin = current->join;
-            while (curjoin->join != NULL) {
-                curjoin = curjoin->join;
+            if (current->next == NEXT_JOIN_ALIAS) {
+                struct join *curjoin = current->join;
+                while (curjoin->join != NULL) {
+                    curjoin = curjoin->join;
+                }
+                strcpy(curjoin->alias, ident);
+                current->next = NEXT_IS_FIELD;
+                return;
             }
-            strcpy(curjoin->alias, ident);
-            current->next = NEXT_IS_FIELD;
         }
     }
 }
@@ -350,14 +353,14 @@ void push_symbol(const char symbol)
     if (symbol == ')') {
         current->scope_ctr--;
         if (current->scope_ctr < current->level) {
-            current->sqlpart = SELECT_PART;
+            //current->sqlpart = SELECT_PART;
             current = current->parent;
             while (current->sibling != NULL) {
                 current = current->sibling;
             }
             current->scope_ctr--;
             current->next = NEXT_IS_QUERY_ALIAS_CHILD;
-            current->sqlpart = SELECT_PART;
+            //current->sqlpart = SELECT_PART;
         }
         return;
     }

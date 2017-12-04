@@ -15,7 +15,7 @@ class TestComplex(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
-        # print(self.result)
+        print(self.result)
         self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):

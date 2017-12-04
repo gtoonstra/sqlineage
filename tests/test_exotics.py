@@ -15,6 +15,7 @@ class TestExotics(unittest.TestCase):
         self.result = []
 
     def verify_result(self, expected):
+        print(self.result)
         self.assertEqual(expected, self.result)
 
     def run_test(self, filename, expected):
@@ -49,3 +50,15 @@ class TestExotics(unittest.TestCase):
                 '',
                 '',
                 'SELECT',1)])
+
+    def test_select_join_for_field(self):
+        self.run_test('tests/resources/exotics/select_join_for_field.sql', 
+            [('ROOT','ROOT','ROOT','','','NONE',0),
+             ('ROOT','foo','foo','','','INSERT',1),
+             ('ROOT','db.schema.asd','a','','db.schema.pow|pow,db.schema.jkl|j','SELECT',1)])
+
+    def test_mixed_brackets_and_regular(self):
+        self.run_test('tests/resources/exotics/mixed_brackets_and_regular.sql', 
+            [('ROOT','ROOT','ROOT','','','NONE',0),
+             ('ROOT','foo','foo','','','INSERT',1),
+             ('ROOT','[servername].db.schema.foo','[servername].db.schema.foo','','','SELECT',1)])
