@@ -392,6 +392,7 @@ void send_model(PyObject *callback) {
     PyObject *arglist;
     PyObject *result;
     struct join *curjoin;
+    struct join *lastjoin;
     char operation[BUFLEN+1] = {"\0"};
     char joins[REALLY_LARGE_BUFFER+1] = {"\0"};
 
@@ -420,7 +421,9 @@ void send_model(PyObject *callback) {
         curjoin = cur->join;
         while (curjoin != NULL) {
             if (strlen(curjoin->table) == 0) {
+                lastjoin = curjoin;
                 curjoin = curjoin->join;
+                free(lastjoin);
                 continue;
             }
             if (strlen(joins) == 0) {
@@ -433,7 +436,9 @@ void send_model(PyObject *callback) {
                 strcat(joins, "|");
                 strcat(joins, curjoin->alias);
             }
+            lastjoin = curjoin;
             curjoin = curjoin->join;
+            free(lastjoin);
         }
 
         // printf("%s, %s, %d, %d\n", cur->table, cur->alias, cur->level, cur->scope_ctr);

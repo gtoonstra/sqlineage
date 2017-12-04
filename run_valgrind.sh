@@ -1,3 +1,3 @@
 #!/bin/bash
 
-valgrind --tool=memcheck --suppressions=misc/valgrind-python.supp pytest
+valgrind --leak-check=full --suppressions=misc/valgrind-python.supp pytest
