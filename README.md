@@ -8,7 +8,7 @@ It probably only works on Ubuntu right now because of the way the code is compil
 
 ### Installation
 
-1. Install ragel: `sudo apt-get install ragel`
+1. Install ragel: `sudo apt-get install ragel` or `brew install ragel` on OSX.
 2. Create a virtual environment venv for python3: `python3 -m venv venv`
 3. Source the environment: `source venv/bin/activate`
 4. Install pip, pip-tools, setuptools and wheel:
@@ -22,7 +22,7 @@ pip install pytest --upgrade
 ```
 
 5. Execute "compile.sh": `./compile.sh`
-6. Compile and install the module in your virtual environment: `python3 setup.py install`
+6. Compile and install the module in your virtual environment: `pip install . --upgrade`
 
 ### Testing
 
@@ -35,8 +35,8 @@ pip install pytest --upgrade
 import sqlineage
 
 
-def callback(parent, table, alias, query_alias, operation, level):
-    print(parent, table, alias, query_alias, operation, level)
+def callback(parent, table, alias, query_alias, joins, operation, level):
+    print(parent, table, alias, query_alias, joins, operation, level)
 
 sqlineage.scan('SELECT * FROM foo', callback)
 ```
@@ -53,6 +53,7 @@ There are thus only five elements you get back:
 - table:  The table name that is selected from or inserted into (not always available)
 - alias:  The alias to refer to a subselect or CTE
 - query_alias: A reference to a query block
+- joins:  Any joins on the table in this SELECT, returned as a `<table>|<alias>,<table>|<alias>` string.
 - operation: The operation taking place in that SQL block
 - level:  The hierarchical level where the code was found, useful for subselects.
 
@@ -86,9 +87,9 @@ will be output as this:
 
 ```
 'ROOT', 'ROOT', 'ROOT', 'NONE', 0
-    'ROOT', 'subselects', 'subselects', 'INSERT', 1
-    'ROOT', '', 'foo', 'SELECT', 1
-        'foo', 'foo.bar.tablename', 'b', 'SELECT', 2
-        'foo', 'abc.dbo.xyz', 'c', 'SELECT', 2
-        'foo', 'abc.def.xyz', 'd', 'SELECT', 2
+    'ROOT', 'subselects', 'subselects', '', 'INSERT', 1
+    'ROOT', '', 'foo', '', 'SELECT', 1
+        'foo', 'foo.bar.tablename', 'b', '', 'SELECT', 2
+        'foo', 'abc.dbo.xyz', 'c', '', 'SELECT', 2
+        'foo', 'abc.def.xyz', 'd', '', 'SELECT', 2
 ```
