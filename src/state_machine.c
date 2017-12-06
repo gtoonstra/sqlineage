@@ -92,6 +92,15 @@ void push_ident(const char *ident) {
         // printf("INTO\n");
         return;
     }
+    if (strcasecmp(ident, "group") == 0 ) {
+        if (current->sqlpart != FROM_PART) {
+            return;
+        }
+        if (current->op == SELECT) {
+            current->sqlpart = WHERE_PART;
+        }
+        return;
+    }
     if (strcasecmp(ident, "select") == 0 ) {
         if (current->sqlpart == WHERE_PART) {
             // ignore everything in where statements...
