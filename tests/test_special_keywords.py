@@ -16,3 +16,9 @@ class TestSpecialKeywords(BaseTest):
             [('ROOT','ROOT','ROOT','','','NONE',0),
              ('ROOT','foo','foo','','','INSERT',1),
              ('ROOT','db.schema.foo','db.schema.foo','','','SELECT',1)])
+
+    def test_orderby_no_where(self):
+        self.run_test('tests/resources/special_keywords/orderby_no_where.sql', 
+            [('ROOT','ROOT','ROOT','','','NONE',0),
+             ('ROOT','foo','foo','','','INSERT',1),
+             ('ROOT','db.schema.foo','db.schema.foo','','','SELECT',1)])

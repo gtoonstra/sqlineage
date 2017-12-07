@@ -101,6 +101,15 @@ void push_ident(const char *ident) {
         }
         return;
     }
+    if (strcasecmp(ident, "order") == 0 ) {
+        if (current->sqlpart != FROM_PART) {
+            return;
+        }
+        if (current->op == SELECT) {
+            current->sqlpart = WHERE_PART;
+        }
+        return;
+    }
     if (strcasecmp(ident, "select") == 0 ) {
         if (current->sqlpart == WHERE_PART) {
             // ignore everything in where statements...
