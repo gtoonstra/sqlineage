@@ -21,3 +21,10 @@ class TestCTEs(BaseTest):
              ('','mytable','mytable','bar','','SELECT',3),
              ('ROOT','other_table','other_table','','','INSERT',1),
              ('ROOT','foo','foo','','','SELECT',1)])
+
+    def test_with_rank_partition(self):
+        self.run_test('tests/resources/cte_statements/with_ranked_partition.sql', 
+            [('ROOT','ROOT','ROOT','','','NONE',0),
+             ('ROOT','','ranked','','','WITH',1),
+             ('ranked','foo','foo','','','SELECT',2),
+             ('ROOT','ranked','ranked','','','SELECT',1)])
