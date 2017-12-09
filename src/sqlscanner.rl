@@ -30,7 +30,7 @@ static PyObject *callback = NULL;
     alnum_u = alnum | '_' | '\.' | '[' | ']';
 
     # Alpha charactres or underscore.
-    alpha_u = alpha | '_' | '[' | ']';
+    alpha_u = alpha | '_' | '[' | ']' | '#';
 
     # Symbols. Upon entering clear the buffer. On all transitions
     # buffer a character. Upon leaving dump the symbol.

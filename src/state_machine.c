@@ -16,6 +16,8 @@ typedef enum {NEXT_IS_FIELD,
         NEXT_JOIN_TABLENAME,
         NEXT_JOIN_ALIAS} next_t;
 typedef enum {SELECT_PART, FROM_PART, WHERE_PART} sqlpart_t;
+typedef enum {NONE_PART, SELECT_INTO_PART, SELECT_FROM_PART, PROCESSED} select_into_t;
+
 
 struct join {
     char table[BUFLEN+1];
@@ -26,10 +28,12 @@ struct join {
 struct fsm {
     char table[BUFLEN+1];
     char alias[BUFLEN+1];
+    char into[BUFLEN+1];
     char query_alias[BUFLEN+1];
     operation_t op;
     next_t next;
     int level;
+    select_into_t select_into;
     int scope_ctr;
     struct fsm *sibling;
     struct fsm *child;
@@ -86,7 +90,7 @@ void push_ident(const char *ident) {
     }
     if (strcasecmp(ident, "into") == 0 ) {
         if (current->op != INSERT) {
-            printf("Unexpected keyword\n");
+            current->select_into = SELECT_INTO_PART;
         }
         current->next = NEXT_IS_TABLENAME;
         // printf("INTO\n");
@@ -111,7 +115,7 @@ void push_ident(const char *ident) {
         return;
     }
     if (strcasecmp(ident, "select") == 0 ) {
-        if (current->sqlpart == WHERE_PART) {
+        if ((current->sqlpart == WHERE_PART) && (current->scope_ctr > current->level)) {
             // ignore everything in where statements...
             return;
         }
@@ -312,11 +316,17 @@ void push_ident(const char *ident) {
     }
     if (current->sqlpart != WHERE_PART) {
         if (current->next == NEXT_IS_TABLENAME) {
-            strcpy(current->table, ident);
-            strcpy(current->alias, ident);
-            // printf("table: %s\n", current->table);
-            current->next = NEXT_IS_ALIAS;
-            return;
+            if (current->select_into == SELECT_INTO_PART) {
+                strcpy(current->into, ident);
+                current->select_into = SELECT_FROM_PART;
+                return;
+            } else {
+                strcpy(current->table, ident);
+                strcpy(current->alias, ident);
+                // printf("table: %s\n", current->table);
+                current->next = NEXT_IS_ALIAS;
+                return;
+            }
         }
         if (current->next == NEXT_IS_ALIAS) {
             strcpy(current->alias, ident);
@@ -422,6 +432,28 @@ void send_model(PyObject *callback) {
                 strcpy(operation, "INSERT");
                 break;
             case SELECT:
+                if (cur->select_into == SELECT_FROM_PART) {
+                    arglist = Py_BuildValue("(ssssssi)", 
+                        cur->parent->alias, 
+                        cur->into, 
+                        "",
+                        "",
+                        "",
+                        "INSERT",
+                        cur->level);
+                    if (arglist == NULL) {
+                        printf("Arg list could not be built. An exception occurred\n");
+                        break;
+                    }
+                    result = PyObject_CallObject(callback, arglist);
+                    Py_DECREF(arglist);
+
+                    if (result == NULL) {
+                        printf("Result came back null, so an exception occurred\n");
+                        break;
+                    }
+                    Py_DECREF(result);
+                }
                 strcpy(operation, "SELECT");
                 break;
             case WITH:

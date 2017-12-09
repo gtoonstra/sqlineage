@@ -42,3 +42,10 @@ class TestExotics(BaseTest):
             [('ROOT','ROOT','ROOT','','','NONE',0),
              ('ROOT','foo','foo','','','INSERT',1),
              ('ROOT','[servername].db.schema.foo','[servername].db.schema.foo','','','SELECT',1)])
+
+    def test_tempdb(self):
+        self.run_test('tests/resources/exotics/tempdb.sql', 
+            [('ROOT','ROOT','ROOT','','','NONE',0),
+             ('ROOT','#temp','','','','INSERT',1),
+             ('ROOT','db.schema.a','a','','db.schema.b|b,db.schema.c|c','SELECT',1),
+             ('ROOT','#temp','#temp','','','SELECT',1)])
